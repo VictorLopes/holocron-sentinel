@@ -1,0 +1,25 @@
+{
+  "name": "holocron-sentinel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root configuration to manage NestJS backend and Next.js frontend projects.",
+  "scripts": {
+    "install:frontend": "npm install --prefix frontend",
+    "install:backend": "npm install --prefix backend",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "dev:frontend": "PORT=3000 npm run dev --prefix frontend",
+    "dev:backend": "PORT=3001 npm run start:dev --prefix backend",
+    "dev": "concurrently -n \"frontend,backend\" -c \"cyan,magenta\" \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "lint:backend": "npm run lint --prefix backend",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "test:backend": "npm run test --prefix backend",
+    "format:backend": "npm run format --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
