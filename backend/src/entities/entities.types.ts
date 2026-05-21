@@ -6,3 +6,13 @@ export interface Entity {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
