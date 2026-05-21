@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Knex } from 'knex';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
@@ -15,6 +10,7 @@ import {
   EntityRow,
   DbEventRow,
 } from './events.types';
+import { EntitySuspendedException } from '../entities/exceptions/entity-suspended.exception';
 
 @Injectable()
 export class EventsService {
@@ -141,9 +137,7 @@ export class EventsService {
     }
 
     if (entityInfo.status === 'suspended') {
-      throw new UnprocessableEntityException(
-        `Monitored entity is suspended and cannot accept new events`,
-      );
+      throw new EntitySuspendedException();
     }
   }
 
@@ -163,9 +157,7 @@ export class EventsService {
     }
 
     if (entityRow.status === 'suspended') {
-      throw new UnprocessableEntityException(
-        `Monitored entity is suspended and cannot accept new events`,
-      );
+      throw new EntitySuspendedException();
     }
 
     return entityRow;

@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventsService } from './events.service';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
-import {
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { EntitySuspendedException } from '../entities/exceptions/entity-suspended.exception';
 
 describe('EventsService', () => {
   let service: EventsService;
@@ -122,7 +119,7 @@ describe('EventsService', () => {
           type: 'info',
           payload: { data: 'test' },
         }),
-      ).rejects.toThrow(UnprocessableEntityException);
+      ).rejects.toThrow(EntitySuspendedException);
 
       expect(mockTransaction).not.toHaveBeenCalled();
     });
