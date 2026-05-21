@@ -1,5 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { Knex } from 'knex';
+import { Subject, Observable } from 'rxjs';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
 import { getCacheKey } from '../database/redis-keys';
@@ -13,8 +19,11 @@ import {
 import { EntitySuspendedException } from '../entities/exceptions/entity-suspended.exception';
 
 @Injectable()
-export class EventsService {
+export class EventsService implements OnModuleDestroy {
   private readonly logger = new Logger(EventsService.name);
+  private readonly eventSubject = new Subject<EventRecord>();
+  public readonly eventStream$: Observable<EventRecord> =
+    this.eventSubject.asObservable();
 
   constructor(
     private readonly dbService: DatabaseService,
@@ -61,6 +70,8 @@ export class EventsService {
       const newRecord = this.mapToEventRecord(result.dbEvent);
 
       await this.updateCache(external_id, entity_id, newRecord);
+
+      this.eventSubject.next(newRecord);
 
       return newRecord;
     } catch (err: unknown) {
@@ -260,6 +271,10 @@ export class EventsService {
         `Redis failed to write caches after transaction: ${err}`,
       );
     }
+  }
+
+  onModuleDestroy(): void {
+    this.eventSubject.complete();
   }
 
   private async handleDuplicateEventError(
