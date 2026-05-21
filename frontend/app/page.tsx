@@ -1,12 +1,14 @@
 import type {Metadata} from 'next';
 import {Activity} from 'lucide-react';
-import {DashboardProvider} from './components/DashboardContext';
-import StreamStatus from './components/StreamStatus';
-import StatsCards from './components/StatsCards';
-import EntitiesTable from './components/EntitiesTable';
-import ThreatRanking from './components/ThreatRanking';
-import RegisterEventForm from './components/RegisterEventForm';
-import EventsFeed from './components/EventsFeed';
+import {
+    DashboardProvider,
+    StreamStatus,
+    StatsCards,
+    EntitiesTable,
+    ThreatRanking,
+    RegisterEventForm,
+    EventsFeed,
+} from './components';
 
 export const dynamic = 'force-dynamic';
 
