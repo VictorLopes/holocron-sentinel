@@ -82,9 +82,6 @@ describe('EventsService', () => {
         id: '1',
         entity_id: '10',
         external_id: 'ext-123',
-        type: 'info',
-        payload: { data: 'test' },
-        created_at: new Date(),
       };
       mockGetOrSet.mockResolvedValue(mockCachedEvent);
 
@@ -97,6 +94,7 @@ describe('EventsService', () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBe('1');
+      expect((result as any).is_duplicate).toBe(true);
       expect(mockGetOrSet).toHaveBeenCalledWith('event:external_id:ext-123', 86400, expect.any(Function));
       expect(mockTransaction).not.toHaveBeenCalled();
     });

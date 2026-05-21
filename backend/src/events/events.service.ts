@@ -13,6 +13,12 @@ export interface EventRecord {
   created_at: Date;
 }
 
+export interface LightweightEventRecord {
+  id: string;
+  entity_id: string;
+  external_id: string;
+}
+
 @Injectable()
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
@@ -22,7 +28,7 @@ export class EventsService {
     private readonly redisService: RedisService,
   ) { }
 
-  async getEventByExternalId(externalId: string): Promise<EventRecord | null> {
+  async getEventByExternalId(externalId: string): Promise<LightweightEventRecord | null> {
     const cacheKey = getCacheKey('EVENT_EXTERNAL_ID', externalId);
     return this.redisService.getOrSet(cacheKey, 86400, async () => {
       const dbEvent = await this.dbService.db('events')
@@ -37,9 +43,6 @@ export class EventsService {
         id: dbEvent.id.toString(),
         entity_id: dbEvent.entity_id.toString(),
         external_id: dbEvent.external_id,
-        type: dbEvent.type,
-        payload: typeof dbEvent.payload === 'string' ? JSON.parse(dbEvent.payload) : dbEvent.payload,
-        created_at: dbEvent.created_at,
       };
     });
   }
@@ -62,13 +65,16 @@ export class EventsService {
     });
   }
 
-  async registerEvent(createEventDto: CreateEventDto): Promise<EventRecord> {
+  async registerEvent(createEventDto: CreateEventDto): Promise<EventRecord | (LightweightEventRecord & { is_duplicate: boolean })> {
     const { entity_id, external_id, type, payload } = createEventDto;
 
     const existingEvent = await this.getEventByExternalId(external_id);
     if (existingEvent) {
       this.logger.log(`Duplicate event ignored (idempotency) for external_id: ${external_id}`);
-      return existingEvent;
+      return {
+        ...existingEvent,
+        is_duplicate: true,
+      };
     }
 
     const entityInfo = await this.getEntityCached(entity_id);
@@ -147,7 +153,12 @@ export class EventsService {
 
       try {
         const eventKey = getCacheKey('EVENT_EXTERNAL_ID', external_id);
-        await this.redisService.client.set(eventKey, JSON.stringify(newRecord), 'EX', 86400);
+        const cacheRecord: LightweightEventRecord = {
+          id: newRecord.id,
+          entity_id: newRecord.entity_id,
+          external_id: newRecord.external_id,
+        };
+        await this.redisService.client.set(eventKey, JSON.stringify(cacheRecord), 'EX', 86400);
 
         const entityKey = getCacheKey('ENTITY', entity_id);
         await this.redisService.client.set(
@@ -169,7 +180,10 @@ export class EventsService {
       if (err.message === 'DUPLICATE_EVENT') {
         const duplicate = await this.getEventByExternalId(external_id);
         if (duplicate) {
-          return duplicate;
+          return {
+            ...duplicate,
+            is_duplicate: true,
+          };
         }
       }
       throw err;
