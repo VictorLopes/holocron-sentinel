@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.schema.createTable('events', (table) => {
     table.bigIncrements('id').primary();
-    table.bigInteger('entity_id').references('id').inTable('entities').onDelete('CASCADE').notNullable();
+    table.bigInteger('entity_id').references('id').inTable('entities').onDelete('CASCADE').notNullable().index();
     table.string('external_id').unique().notNullable();
     table.string('type').notNullable();
     table.jsonb('payload').notNullable();
