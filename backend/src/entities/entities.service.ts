@@ -91,7 +91,11 @@ export class EntitiesService {
     limit: number = 10,
     search?: string,
     status?: string,
-  ): Promise<PaginatedResponse<Entity & { total_events: number; last_event_at: Date | null }>> {
+  ): Promise<
+    PaginatedResponse<
+      Entity & { total_events: number; last_event_at: Date | null }
+    >
+  > {
     const offset = (page - 1) * limit;
 
     this.logger.log(
@@ -107,11 +111,12 @@ export class EntitiesService {
     }
     const [{ count }] = await countQuery.count('e.id as count');
 
-    const rowsQuery = this.dbService.db('entities as e')
+    const rowsQuery = this.dbService
+      .db('entities as e')
       .select(
         'e.*',
         this.dbService.db.raw('COALESCE(COUNT(ev.id), 0)::int as total_events'),
-        this.dbService.db.raw('MAX(ev.created_at) as last_event_at')
+        this.dbService.db.raw('MAX(ev.created_at) as last_event_at'),
       )
       .leftJoin('events as ev', 'ev.entity_id', 'e.id')
       .groupBy('e.id')
@@ -130,7 +135,10 @@ export class EntitiesService {
     const totalCount = Number(count);
 
     return {
-      data: rows as any[],
+      data: rows as (Entity & {
+        total_events: number;
+        last_event_at: Date | null;
+      })[],
       meta: {
         total: totalCount,
         page,

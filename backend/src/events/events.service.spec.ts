@@ -3,6 +3,7 @@ import { EventsService } from './events.service';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
 import { EntitySuspendedException } from '../entities/exceptions/entity-suspended.exception';
+import { LightweightEventRecord } from './events.types';
 
 describe('EventsService', () => {
   let service: EventsService;
@@ -96,7 +97,10 @@ describe('EventsService', () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBe('1');
-      expect((result as any).is_duplicate).toBe(true);
+      expect(
+        (result as LightweightEventRecord & { is_duplicate: boolean })
+          .is_duplicate,
+      ).toBe(true);
       expect(mockGetOrSet).toHaveBeenCalledWith(
         'event:external_id:ext-123',
         86400,
@@ -131,36 +135,40 @@ describe('EventsService', () => {
         critical_events_count: 1,
       }); // Active entity
 
-      const mockTrx = jest.fn().mockImplementation((table) => {
-        if (table === 'entities') {
-          return {
-            where: jest.fn().mockReturnThis(),
-            forUpdate: jest.fn().mockReturnThis(),
-            first: jest.fn().mockResolvedValue({
-              id: '10',
-              status: 'active',
-              critical_events_count: 1,
-            }),
-            update: jest.fn().mockResolvedValue(1),
-          };
-        }
-        if (table === 'events') {
-          return {
-            insert: jest.fn().mockReturnThis(),
-            returning: jest.fn().mockResolvedValue([
-              {
-                id: '5',
-                entity_id: '10',
-                external_id: 'ext-123',
-                type: 'info',
-                payload: { data: 'test' },
-                created_at: new Date(),
-              },
-            ]),
-          };
-        }
-      });
-      mockTrx.fn = { now: () => 'now' };
+      const mockTrx = Object.assign(
+        jest.fn().mockImplementation((table) => {
+          if (table === 'entities') {
+            return {
+              where: jest.fn().mockReturnThis(),
+              forUpdate: jest.fn().mockReturnThis(),
+              first: jest.fn().mockResolvedValue({
+                id: '10',
+                status: 'active',
+                critical_events_count: 1,
+              }),
+              update: jest.fn().mockResolvedValue(1),
+            };
+          }
+          if (table === 'events') {
+            return {
+              insert: jest.fn().mockReturnThis(),
+              returning: jest.fn().mockResolvedValue([
+                {
+                  id: '5',
+                  entity_id: '10',
+                  external_id: 'ext-123',
+                  type: 'info',
+                  payload: { data: 'test' },
+                  created_at: new Date(),
+                },
+              ]),
+            };
+          }
+        }),
+        {
+          fn: { now: () => 'now' },
+        },
+      );
       mockTransaction.mockImplementation((callback) => callback(mockTrx));
 
       const result = await service.registerEvent({
@@ -190,36 +198,40 @@ describe('EventsService', () => {
       }); // Active entity with 2 critical events
 
       const mockTrxUpdate = jest.fn().mockResolvedValue(1);
-      const mockTrx = jest.fn().mockImplementation((table) => {
-        if (table === 'entities') {
-          return {
-            where: jest.fn().mockReturnThis(),
-            forUpdate: jest.fn().mockReturnThis(),
-            first: jest.fn().mockResolvedValue({
-              id: '10',
-              status: 'active',
-              critical_events_count: 2,
-            }),
-            update: mockTrxUpdate,
-          };
-        }
-        if (table === 'events') {
-          return {
-            insert: jest.fn().mockReturnThis(),
-            returning: jest.fn().mockResolvedValue([
-              {
-                id: '6',
-                entity_id: '10',
-                external_id: 'ext-critical',
-                type: 'critical',
-                payload: { data: 'threat' },
-                created_at: new Date(),
-              },
-            ]),
-          };
-        }
-      });
-      mockTrx.fn = { now: () => 'now' };
+      const mockTrx = Object.assign(
+        jest.fn().mockImplementation((table) => {
+          if (table === 'entities') {
+            return {
+              where: jest.fn().mockReturnThis(),
+              forUpdate: jest.fn().mockReturnThis(),
+              first: jest.fn().mockResolvedValue({
+                id: '10',
+                status: 'active',
+                critical_events_count: 2,
+              }),
+              update: mockTrxUpdate,
+            };
+          }
+          if (table === 'events') {
+            return {
+              insert: jest.fn().mockReturnThis(),
+              returning: jest.fn().mockResolvedValue([
+                {
+                  id: '6',
+                  entity_id: '10',
+                  external_id: 'ext-critical',
+                  type: 'critical',
+                  payload: { data: 'threat' },
+                  created_at: new Date(),
+                },
+              ]),
+            };
+          }
+        }),
+        {
+          fn: { now: () => 'now' },
+        },
+      );
       mockTransaction.mockImplementation((callback) => callback(mockTrx));
 
       const result = await service.registerEvent({

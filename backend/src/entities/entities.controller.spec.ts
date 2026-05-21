@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EntitiesController } from './entities.controller';
 import { EntitiesService } from './entities.service';
+import { CreateEntityDto } from './dto/create-entity.dto';
 
 describe('EntitiesController', () => {
   let controller: EntitiesController;
   let service: EntitiesService;
 
   const mockEntitiesService = {
-    create: jest.fn().mockImplementation((dto) =>
+    create: jest.fn().mockImplementation((dto: CreateEntityDto) =>
       Promise.resolve({
         id: '1',
         name: dto.name,
