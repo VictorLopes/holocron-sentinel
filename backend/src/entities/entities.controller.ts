@@ -24,6 +24,17 @@ export class EntitiesController {
   @Get()
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async findAll(@Query() query: QueryEntitiesDto) {
+    return this.entitiesService.getAllEntities(
+      query.page,
+      query.limit,
+      query.search,
+      query.status,
+    );
+  }
+
+  @Get('ranking')
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async getRanking(@Query() query: QueryEntitiesDto) {
     return this.entitiesService.getEntitiesWithCriticalEvents(
       query.page,
       query.limit,

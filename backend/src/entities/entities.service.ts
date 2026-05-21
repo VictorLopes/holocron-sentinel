@@ -85,4 +85,58 @@ export class EntitiesService {
       },
     };
   }
+
+  async getAllEntities(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    status?: string,
+  ): Promise<PaginatedResponse<Entity & { total_events: number; last_event_at: Date | null }>> {
+    const offset = (page - 1) * limit;
+
+    this.logger.log(
+      `Fetching all monitored entities (page=${page}, limit=${limit}, search=${search}, status=${status})`,
+    );
+
+    const countQuery = this.dbService.db('entities as e');
+    if (search) {
+      countQuery.where('e.name', 'ILIKE', `%${search}%`);
+    }
+    if (status) {
+      countQuery.where('e.status', status);
+    }
+    const [{ count }] = await countQuery.count('e.id as count');
+
+    const rowsQuery = this.dbService.db('entities as e')
+      .select(
+        'e.*',
+        this.dbService.db.raw('COALESCE(COUNT(ev.id), 0)::int as total_events'),
+        this.dbService.db.raw('MAX(ev.created_at) as last_event_at')
+      )
+      .leftJoin('events as ev', 'ev.entity_id', 'e.id')
+      .groupBy('e.id')
+      .orderBy('e.created_at', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    if (search) {
+      rowsQuery.where('e.name', 'ILIKE', `%${search}%`);
+    }
+    if (status) {
+      rowsQuery.where('e.status', status);
+    }
+
+    const rows = await rowsQuery;
+    const totalCount = Number(count);
+
+    return {
+      data: rows as any[],
+      meta: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  }
 }

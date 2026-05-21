@@ -17,6 +17,7 @@ async function bootstrap() {
       logger: new CloudWatchLogger(),
     },
   );
+  app.enableCors();
   await app.listen(process.env.PORT ?? 3001);
 }
 void bootstrap();

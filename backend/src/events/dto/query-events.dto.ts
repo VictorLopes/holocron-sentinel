@@ -1,7 +1,7 @@
 import { IsOptional, IsInt, Min, Max, IsString, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class QueryEntitiesDto {
+export class QueryEventsDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -13,14 +13,14 @@ export class QueryEntitiesDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  limit: number = 10;
+  limit: number = 20;
 
   @IsOptional()
   @IsString()
-  search?: string;
+  entity_id?: string;
 
   @IsOptional()
   @IsString()
-  @IsIn(['active', 'suspended'])
-  status?: string;
+  @IsIn(['info', 'warning', 'critical'])
+  type?: string;
 }

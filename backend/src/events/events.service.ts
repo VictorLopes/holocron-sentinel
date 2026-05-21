@@ -292,4 +292,53 @@ export class EventsService implements OnModuleDestroy {
     }
     throw err;
   }
+
+  async getRecentEvents(
+    page: number = 1,
+    limit: number = 20,
+    entityId?: string | number,
+    type?: string,
+  ): Promise<{ data: EventRecord[]; meta: any }> {
+    const offset = (page - 1) * limit;
+
+    this.logger.log(
+      `Fetching recent events (page=${page}, limit=${limit}, entityId=${entityId}, type=${type})`,
+    );
+
+    const countQuery = this.dbService.db('events');
+    if (entityId) {
+      countQuery.where('entity_id', entityId);
+    }
+    if (type) {
+      countQuery.where('type', type);
+    }
+    const [{ count }] = await countQuery.count('id as count');
+
+    const rowsQuery = this.dbService.db('events')
+      .select('*')
+      .orderBy('created_at', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    if (entityId) {
+      rowsQuery.where('entity_id', entityId);
+    }
+    if (type) {
+      rowsQuery.where('type', type);
+    }
+
+    const rows = (await rowsQuery) as DbEventRow[];
+    const data = rows.map((row) => this.mapToEventRecord(row));
+    const totalCount = Number(count);
+
+    return {
+      data,
+      meta: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  }
 }
