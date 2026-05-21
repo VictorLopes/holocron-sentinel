@@ -23,7 +23,8 @@ export interface EventRecord {
     created_at: string;
 }
 
-export const CRITICAL_LIMIT = Number(process.env.NEXT_PUBLIC_CRITICAL_LIMIT) || 3;
+export const CRITICAL_LIMIT =
+    Number(process.env.NEXT_PUBLIC_CRITICAL_LIMIT) || 3;
 
 interface DashboardContextType {
     entities: Entity[];
@@ -37,9 +38,15 @@ interface DashboardContextType {
     handleRefreshAll: () => Promise<void>;
     selectedEntityId: string;
     setSelectedEntityId: (id: string) => void;
+    entitySearch: string;
+    setEntitySearch: (search: string) => void;
+    entityStatusFilter: 'all' | 'active' | 'suspended';
+    setEntityStatusFilter: (status: 'all' | 'active' | 'suspended') => void;
 }
 
-const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
+const DashboardContext = createContext<DashboardContextType | undefined>(
+    undefined,
+);
 
 export function useDashboard() {
     const context = useContext(DashboardContext);
@@ -62,7 +69,11 @@ export function DashboardProvider({
     initialRanking,
     children,
 }: DashboardProviderProps) {
-    const value = useDashboardState(initialEntities, initialEvents, initialRanking);
+    const value = useDashboardState(
+        initialEntities,
+        initialEvents,
+        initialRanking,
+    );
 
     return (
         <DashboardContext.Provider value={value}>

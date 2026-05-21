@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import { useDashboard } from '../DashboardContext';
 
@@ -16,7 +15,8 @@ export default function ThreatRanking() {
                 </h3>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-                Entities ordered by total critical events generated over the last 7 days.
+                Entities ordered by total critical events generated over the
+                last 7 days.
             </p>
 
             {ranking.length === 0 ? (
@@ -28,8 +28,7 @@ export default function ThreatRanking() {
                     {ranking.map((ent, index) => (
                         <div
                             key={ent.id}
-                            className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-lg relative overflow-hidden"
-                        >
+                            className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-lg relative overflow-hidden">
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 text-sm font-extrabold border border-rose-100 dark:border-rose-900/30">
                                     #{index + 1}
@@ -39,7 +38,8 @@ export default function ThreatRanking() {
                                         {ent.name}
                                     </span>
                                     <span className="text-xs text-slate-400">
-                                        Total critical events: {ent.critical_events_count}
+                                        Total critical events:{' '}
+                                        {ent.critical_events_count}
                                     </span>
                                 </div>
                             </div>
@@ -49,8 +49,7 @@ export default function ThreatRanking() {
                                         ent.status === 'suspended'
                                             ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
                                             : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
-                                    }`}
-                                >
+                                    }`}>
                                     {ent.status}
                                 </span>
                             </div>

@@ -1,11 +1,11 @@
 'use client';
 
-import React, {useMemo} from 'react';
-import {Database, CheckCircle, XCircle, Flame} from 'lucide-react';
-import {useDashboard} from '../DashboardContext';
+import React, { useMemo } from 'react';
+import { Database, CheckCircle, XCircle, Flame } from 'lucide-react';
+import { useDashboard } from '../DashboardContext';
 
 export default function StatsCards() {
-    const {entities} = useDashboard();
+    const { entities } = useDashboard();
 
     const stats = useMemo(() => {
         const total = entities.length;
@@ -17,7 +17,7 @@ export default function StatsCards() {
             (acc, curr) => acc + (curr.critical_events_count || 0),
             0,
         );
-        return {total, active, suspended, criticalCount};
+        return { total, active, suspended, criticalCount };
     }, [entities]);
 
     return (

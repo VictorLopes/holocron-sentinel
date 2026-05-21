@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Activity, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Activity } from 'lucide-react';
 import { useDashboard } from '../DashboardContext';
 
 export default function EventsFeed() {
     const { events, entities } = useDashboard();
-    const [eventTypeFilter, setEventTypeFilter] = useState<'all' | 'info' | 'warning' | 'critical'>('all');
+    const [eventTypeFilter, setEventTypeFilter] = useState<
+        'all' | 'info' | 'warning' | 'critical'
+    >('all');
 
     const filteredEvents = useMemo(() => {
         return events.filter((ev) => {
@@ -30,25 +32,26 @@ export default function EventsFeed() {
                 </div>
 
                 <div className="flex rounded-md border border-slate-200 dark:border-slate-800 p-0.5 bg-slate-50 dark:bg-slate-950 w-full">
-                    {(['all', 'info', 'warning', 'critical'] as const).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setEventTypeFilter(type)}
-                            className={`flex-1 text-center py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-colors ${
-                                eventTypeFilter === type
-                                    ? type === 'critical'
-                                        ? 'bg-rose-600 text-white shadow-sm'
-                                        : type === 'warning'
-                                          ? 'bg-amber-50 text-white shadow-sm'
-                                          : type === 'info'
-                                            ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
-                                            : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
-                            }`}
-                        >
-                            {type}
-                        </button>
-                    ))}
+                    {(['all', 'info', 'warning', 'critical'] as const).map(
+                        (type) => (
+                            <button
+                                key={type}
+                                onClick={() => setEventTypeFilter(type)}
+                                className={`flex-1 text-center py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                                    eventTypeFilter === type
+                                        ? type === 'critical'
+                                            ? 'bg-rose-600 text-white shadow-sm'
+                                            : type === 'warning'
+                                              ? 'bg-amber-50 text-white shadow-sm'
+                                              : type === 'info'
+                                                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
+                                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                }`}>
+                                {type}
+                            </button>
+                        ),
+                    )}
                 </div>
             </div>
 
@@ -76,8 +79,7 @@ export default function EventsFeed() {
                                         : ev.type === 'warning'
                                           ? 'bg-amber-50/10 dark:bg-amber-950/5 border-amber-200/50 dark:border-amber-900/30'
                                           : 'bg-slate-50/30 dark:bg-slate-900/30 border-slate-200/50 dark:border-slate-800/50'
-                                }`}
-                            >
+                                }`}>
                                 <div className="flex items-center justify-between">
                                     <span
                                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -86,12 +88,13 @@ export default function EventsFeed() {
                                                 : ev.type === 'warning'
                                                   ? 'bg-amber-100 text-amber-850 dark:bg-amber-950/40 dark:text-amber-400'
                                                   : 'bg-slate-100 text-slate-850 dark:bg-slate-800 dark:text-slate-300'
-                                        }`}
-                                    >
+                                        }`}>
                                         {ev.type}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-mono">
-                                        {new Date(ev.created_at).toLocaleTimeString([], {
+                                        {new Date(
+                                            ev.created_at,
+                                        ).toLocaleTimeString([], {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             second: '2-digit',
@@ -100,7 +103,9 @@ export default function EventsFeed() {
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400">Target: </span>
+                                    <span className="text-slate-400">
+                                        Target:{' '}
+                                    </span>
                                     <span className="font-semibold text-slate-700 dark:text-slate-300">
                                         {entityName}
                                     </span>
@@ -109,11 +114,16 @@ export default function EventsFeed() {
                                     External ID: {ev.external_id}
                                 </div>
 
-                                {ev.payload && Object.keys(ev.payload).length > 0 && (
-                                    <div className="p-2 bg-slate-50 dark:bg-slate-900/60 rounded border border-slate-150 dark:border-slate-850 font-mono text-[10px] text-slate-600 dark:text-slate-400 overflow-x-auto max-h-[80px]">
-                                        {JSON.stringify(ev.payload, null, 2)}
-                                    </div>
-                                )}
+                                {ev.payload &&
+                                    Object.keys(ev.payload).length > 0 && (
+                                        <div className="p-2 bg-slate-50 dark:bg-slate-900/60 rounded border border-slate-150 dark:border-slate-850 font-mono text-[10px] text-slate-600 dark:text-slate-400 overflow-x-auto max-h-[80px]">
+                                            {JSON.stringify(
+                                                ev.payload,
+                                                null,
+                                                2,
+                                            )}
+                                        </div>
+                                    )}
                             </div>
                         );
                     })

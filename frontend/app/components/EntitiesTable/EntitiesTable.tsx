@@ -1,33 +1,26 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Search, Plus, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, AlertCircle } from 'lucide-react';
 import { useDashboard, Entity, CRITICAL_LIMIT } from '../DashboardContext';
 
 export default function EntitiesTable() {
-    const { entities, setEntities, setSelectedEntityId } = useDashboard();
-
-    const [entitySearch, setEntitySearch] = useState('');
-    const [entityStatusFilter, setEntityStatusFilter] = useState<
-        'all' | 'active' | 'suspended'
-    >('all');
+    const {
+        entities,
+        setEntities,
+        setSelectedEntityId,
+        entitySearch,
+        setEntitySearch,
+        entityStatusFilter,
+        setEntityStatusFilter,
+    } = useDashboard();
 
     const [showCreateEntity, setShowCreateEntity] = useState(false);
     const [newEntityName, setNewEntityName] = useState('');
     const [createEntityError, setCreateEntityError] = useState('');
     const [createEntitySuccess, setCreateEntitySuccess] = useState('');
 
-    const filteredEntities = useMemo(() => {
-        return entities.filter((ent) => {
-            const matchesSearch = ent.name
-                .toLowerCase()
-                .includes(entitySearch.toLowerCase());
-            const matchesStatus =
-                entityStatusFilter === 'all' ||
-                ent.status === entityStatusFilter;
-            return matchesSearch && matchesStatus;
-        });
-    }, [entities, entitySearch, entityStatusFilter]);
+    const filteredEntities = entities;
 
     const handleCreateEntity = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -92,8 +85,7 @@ export default function EntitiesTable() {
                     </div>
                     <button
                         onClick={() => setShowCreateEntity(!showCreateEntity)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors self-start sm:self-auto"
-                    >
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors self-start sm:self-auto">
                         <Plus className="h-4 w-4" />
                         New Entity
                     </button>
@@ -102,24 +94,24 @@ export default function EntitiesTable() {
                 {showCreateEntity && (
                     <form
                         onSubmit={handleCreateEntity}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3"
-                    >
+                        className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3">
                         <h4 className="text-sm font-semibold">
                             Register Monitored Entity
                         </h4>
                         <div className="flex gap-2">
                             <input
                                 type="text"
-                                placeholder="e.g. Production Database, API Gateway"
+                                placeholder="e.g. Planet, Rebel Base, Important Ship, Sensitive Point"
                                 value={newEntityName}
-                                onChange={(e) => setNewEntityName(e.target.value)}
+                                onChange={(e) =>
+                                    setNewEntityName(e.target.value)
+                                }
                                 className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 maxLength={100}
                             />
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-white rounded-lg text-sm font-medium transition-colors"
-                            >
+                                className="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-white rounded-lg text-sm font-medium transition-colors">
                                 Create
                             </button>
                         </div>
@@ -155,8 +147,7 @@ export default function EntitiesTable() {
                                 entityStatusFilter === 'all'
                                     ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm'
                                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
-                            }`}
-                        >
+                            }`}>
                             All
                         </button>
                         <button
@@ -165,8 +156,7 @@ export default function EntitiesTable() {
                                 entityStatusFilter === 'active'
                                     ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
                                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
-                            }`}
-                        >
+                            }`}>
                             Active
                         </button>
                         <button
@@ -175,8 +165,7 @@ export default function EntitiesTable() {
                                 entityStatusFilter === 'suspended'
                                     ? 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 shadow-sm'
                                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
-                            }`}
-                        >
+                            }`}>
                             Suspended
                         </button>
                     </div>
@@ -197,15 +186,19 @@ export default function EntitiesTable() {
                             <tr className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase border-b border-slate-200 dark:border-slate-800">
                                 <th className="px-6 py-4">Entity Details</th>
                                 <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Threat Level (Critical Events)</th>
+                                <th className="px-6 py-4">
+                                    Threat Level (Critical Events)
+                                </th>
                                 <th className="px-6 py-4">Total Events</th>
                                 <th className="px-6 py-4">Last Activity</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                             {filteredEntities.map((ent) => {
-                                const criticalCount = ent.critical_events_count || 0;
-                                const isCloseToSuspension = criticalCount === CRITICAL_LIMIT - 1;
+                                const criticalCount =
+                                    ent.critical_events_count || 0;
+                                const isCloseToSuspension =
+                                    criticalCount === CRITICAL_LIMIT - 1;
                                 const isSuspended = ent.status === 'suspended';
 
                                 return (
@@ -217,8 +210,7 @@ export default function EntitiesTable() {
                                                 : isCloseToSuspension
                                                   ? 'bg-amber-50/10 dark:bg-amber-950/5'
                                                   : ''
-                                        }`}
-                                    >
+                                        }`}>
                                         <td className="px-6 py-4">
                                             <span className="font-semibold text-slate-900 dark:text-slate-100 block">
                                                 {ent.name}
@@ -234,8 +226,7 @@ export default function EntitiesTable() {
                                                     isSuspended
                                                         ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30'
                                                         : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30'
-                                                }`}
-                                            >
+                                                }`}>
                                                 <span
                                                     className={`h-1.5 w-1.5 rounded-full ${isSuspended ? 'bg-rose-500' : 'bg-emerald-500'}`}
                                                 />
@@ -253,9 +244,9 @@ export default function EntitiesTable() {
                                                                 : isCloseToSuspension
                                                                   ? 'text-amber-600 dark:text-amber-400'
                                                                   : 'text-slate-500'
-                                                        }`}
-                                                    >
-                                                        {criticalCount} / {CRITICAL_LIMIT}
+                                                        }`}>
+                                                        {criticalCount} /{' '}
+                                                        {CRITICAL_LIMIT}
                                                     </span>
                                                     {isSuspended && (
                                                         <span className="text-[10px] text-rose-500 font-bold uppercase">
@@ -269,11 +260,16 @@ export default function EntitiesTable() {
                                                     )}
                                                 </div>
                                                 <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden flex">
-                                                    {[...Array(CRITICAL_LIMIT)].map((_, idx) => (
+                                                    {[
+                                                        ...Array(
+                                                            CRITICAL_LIMIT,
+                                                        ),
+                                                    ].map((_, idx) => (
                                                         <div
                                                             key={idx}
                                                             className={`flex-1 h-full border-r border-white dark:border-slate-900 last:border-0 transition-all ${
-                                                                idx < criticalCount
+                                                                idx <
+                                                                criticalCount
                                                                     ? isSuspended
                                                                         ? 'bg-rose-500'
                                                                         : isCloseToSuspension
@@ -293,16 +289,22 @@ export default function EntitiesTable() {
                                         <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
                                             {ent.last_event_at ? (
                                                 <span>
-                                                    {new Date(ent.last_event_at).toLocaleTimeString([], {
+                                                    {new Date(
+                                                        ent.last_event_at,
+                                                    ).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit',
                                                         second: '2-digit',
                                                     })}
                                                     <br />
-                                                    {new Date(ent.last_event_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        ent.last_event_at,
+                                                    ).toLocaleDateString()}
                                                 </span>
                                             ) : (
-                                                <span className="text-slate-300 dark:text-slate-700">—</span>
+                                                <span className="text-slate-300 dark:text-slate-700">
+                                                    —
+                                                </span>
                                             )}
                                         </td>
                                     </tr>

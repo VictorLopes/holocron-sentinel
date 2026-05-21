@@ -1,16 +1,16 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     PlusCircle,
     AlertTriangle,
     AlertCircle,
     CheckCircle,
 } from 'lucide-react';
-import {useDashboard} from '../DashboardContext';
+import { useDashboard } from '../DashboardContext';
 
 export default function RegisterEventForm() {
-    const {entities, selectedEntityId, setSelectedEntityId} = useDashboard();
+    const { entities, selectedEntityId, setSelectedEntityId } = useDashboard();
 
     const [eventExternalId, setEventExternalId] = useState('');
     const [eventType, setEventType] = useState<'info' | 'warning' | 'critical'>(
@@ -54,7 +54,7 @@ export default function RegisterEventForm() {
         try {
             const res = await fetch('http://localhost:3002/events', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     entity_id: selectedEntityId,
                     external_id: eventExternalId,

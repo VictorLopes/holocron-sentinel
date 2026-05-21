@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Entity, EventRecord, CRITICAL_LIMIT } from './DashboardContext';
 
 export function useDashboardState(
@@ -18,6 +18,54 @@ export function useDashboardState(
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedEntityId, setSelectedEntityId] = useState('');
 
+    const [entitySearch, setEntitySearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [entityStatusFilter, setEntityStatusFilter] = useState<
+        'all' | 'active' | 'suspended'
+    >('all');
+
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(entitySearch);
+        }, 300);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [entitySearch]);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const fetchFilteredEntities = async () => {
+            setIsRefreshing(true);
+            try {
+                let url = 'http://localhost:3002/entities?limit=100';
+                if (debouncedSearch) {
+                    url += `&search=${encodeURIComponent(debouncedSearch)}`;
+                }
+                if (entityStatusFilter !== 'all') {
+                    url += `&status=${entityStatusFilter}`;
+                }
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    setEntities(data.data || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch filtered entities:', err);
+            } finally {
+                setIsRefreshing(false);
+            }
+        };
+
+        fetchFilteredEntities();
+    }, [debouncedSearch, entityStatusFilter]);
+
     const fetchRanking = async () => {
         try {
             const res = await fetch('http://localhost:3002/entities/ranking');
@@ -33,8 +81,16 @@ export function useDashboardState(
     const handleRefreshAll = async () => {
         setIsRefreshing(true);
         try {
+            let entitiesUrl = 'http://localhost:3002/entities?limit=100';
+            if (entitySearch) {
+                entitiesUrl += `&search=${encodeURIComponent(entitySearch)}`;
+            }
+            if (entityStatusFilter !== 'all') {
+                entitiesUrl += `&status=${entityStatusFilter}`;
+            }
+
             const [entitiesRes, eventsRes, rankingRes] = await Promise.all([
-                fetch('http://localhost:3002/entities?limit=100'),
+                fetch(entitiesUrl),
                 fetch('http://localhost:3002/events?limit=50'),
                 fetch('http://localhost:3002/entities/ranking'),
             ]);
@@ -71,8 +127,7 @@ export function useDashboardState(
                 setStreamStatus('connected');
             };
 
-            eventSource.onerror = (e) => {
-                console.error('SSE connection error', e);
+            eventSource.onerror = (_) => {
                 setStreamStatus('disconnected');
                 eventSource.close();
                 setTimeout(connectStream, 5000);
@@ -140,5 +195,9 @@ export function useDashboardState(
         handleRefreshAll,
         selectedEntityId,
         setSelectedEntityId,
+        entitySearch,
+        setEntitySearch,
+        entityStatusFilter,
+        setEntityStatusFilter,
     };
 }
