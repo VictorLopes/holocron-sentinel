@@ -13,11 +13,13 @@ describe('EventsService', () => {
   let dbService: DatabaseService;
 
   const mockRedisSet = jest.fn();
+  const mockRedisDel = jest.fn();
   const mockGetOrSet = jest.fn();
 
   const mockRedisService = {
     client: {
       set: mockRedisSet,
+      del: mockRedisDel,
     },
     getOrSet: mockGetOrSet,
   };
@@ -174,20 +176,13 @@ describe('EventsService', () => {
       expect(result).toBeDefined();
       expect(result.id).toBe('5');
       expect(mockTransaction).toHaveBeenCalled();
-      expect(mockRedisSet).toHaveBeenNthCalledWith(
-        1,
+      expect(mockRedisSet).toHaveBeenCalledWith(
         'event:external_id:ext-123',
         expect.any(String),
         'EX',
         86400,
       );
-      expect(mockRedisSet).toHaveBeenNthCalledWith(
-        2,
-        'entity:10',
-        JSON.stringify({ status: 'active', critical_events_count: 1 }),
-        'EX',
-        86400,
-      );
+      expect(mockRedisDel).toHaveBeenCalledWith('entity:10');
     });
 
     it('should increment count and auto-suspend when critical limit is reached', async () => {
@@ -244,13 +239,7 @@ describe('EventsService', () => {
         status: 'suspended',
         updated_at: 'now',
       });
-      expect(mockRedisSet).toHaveBeenNthCalledWith(
-        2,
-        'entity:10',
-        JSON.stringify({ status: 'suspended', critical_events_count: 3 }),
-        'EX',
-        86400,
-      );
+      expect(mockRedisDel).toHaveBeenCalledWith('entity:10');
     });
   });
 });

@@ -50,6 +50,53 @@ export class EventsService {
     private readonly redisService: RedisService,
   ) {}
 
+  async registerEvent(
+    createEventDto: CreateEventDto,
+  ): Promise<
+    EventRecord | (LightweightEventRecord & { is_duplicate: boolean })
+  > {
+    const { entity_id, external_id, type } = createEventDto;
+
+    const duplicateResult = await this.checkExternalId(external_id);
+    if (duplicateResult) {
+      return duplicateResult;
+    }
+
+    await this.validateEntityStatus(entity_id);
+
+    try {
+      const result = await this.dbService.db.transaction(async (trx) => {
+        const entityRow = await this.verifyAndLockEntityInTransaction(
+          trx,
+          entity_id,
+        );
+
+        const { updatedStatus, updatedCount } =
+          await this.updateEntityStatusInTransaction(
+            trx,
+            entity_id,
+            entityRow,
+            type,
+          );
+
+        const dbEvent = await this.insertEventInTransaction(
+          trx,
+          createEventDto,
+        );
+
+        return { dbEvent, updatedStatus, updatedCount };
+      });
+
+      const newRecord = this.mapToEventRecord(result.dbEvent);
+
+      await this.updateCache(external_id, entity_id, newRecord);
+
+      return newRecord;
+    } catch (err: unknown) {
+      return this.handleDuplicateEventError(external_id, err);
+    }
+  }
+
   async getEventByExternalId(
     externalId: string,
   ): Promise<LightweightEventRecord | null> {
@@ -93,58 +140,7 @@ export class EventsService {
     });
   }
 
-  async registerEvent(
-    createEventDto: CreateEventDto,
-  ): Promise<
-    EventRecord | (LightweightEventRecord & { is_duplicate: boolean })
-  > {
-    const { entity_id, external_id, type } = createEventDto;
-
-    const duplicateResult = await this.checkIdempotency(external_id);
-    if (duplicateResult) {
-      return duplicateResult;
-    }
-
-    await this.validateEntityStatus(entity_id);
-
-    try {
-      const result = await this.dbService.db.transaction(async (trx) => {
-        const entityRow = await this.verifyAndLockEntityInTransaction(
-          trx,
-          entity_id,
-        );
-        const dbEvent = await this.insertEventInTransaction(
-          trx,
-          createEventDto,
-        );
-        const { updatedStatus, updatedCount } =
-          await this.updateEntityStatusInTransaction(
-            trx,
-            entity_id,
-            entityRow,
-            type,
-          );
-
-        return { dbEvent, updatedStatus, updatedCount };
-      });
-
-      const newRecord = this.mapToEventRecord(result.dbEvent);
-
-      await this.updateCache(
-        external_id,
-        entity_id,
-        newRecord,
-        result.updatedStatus,
-        result.updatedCount,
-      );
-
-      return newRecord;
-    } catch (err: unknown) {
-      return this.handleDuplicateEventError(external_id, err);
-    }
-  }
-
-  private async checkIdempotency(
+  private async checkExternalId(
     externalId: string,
   ): Promise<(LightweightEventRecord & { is_duplicate: boolean }) | null> {
     const existingEvent = await this.getEventByExternalId(externalId);
@@ -162,6 +158,7 @@ export class EventsService {
 
   private async validateEntityStatus(entityId: string | number): Promise<void> {
     const entityInfo = await this.getEntityCached(entityId);
+
     if (!entityInfo) {
       throw new NotFoundException(
         `Monitored entity with ID ${entityId} not found`,
@@ -274,8 +271,6 @@ export class EventsService {
     externalId: string,
     entityId: string | number,
     newRecord: EventRecord,
-    updatedStatus: string,
-    updatedCount: number,
   ): Promise<void> {
     try {
       const eventKey = getCacheKey('EVENT_EXTERNAL_ID', externalId);
@@ -292,15 +287,7 @@ export class EventsService {
       );
 
       const entityKey = getCacheKey('ENTITY', entityId);
-      await this.redisService.client.set(
-        entityKey,
-        JSON.stringify({
-          status: updatedStatus,
-          critical_events_count: updatedCount,
-        }),
-        'EX',
-        86400,
-      );
+      await this.redisService.client.del(entityKey);
     } catch (err) {
       this.logger.warn(
         `Redis failed to write caches after transaction: ${err}`,
