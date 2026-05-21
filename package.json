@@ -17,7 +17,11 @@
     "lint:backend": "npm run lint --prefix backend",
     "lint": "npm run lint:frontend && npm run lint:backend",
     "test:backend": "npm run test --prefix backend",
-    "format:backend": "npm run format --prefix backend"
+    "format:backend": "npm run format --prefix backend",
+    "migration:run": "npm run migration:run --prefix backend",
+    "migration:rollback": "npm run migration:rollback --prefix backend",
+    "migration:status": "npm run migration:status --prefix backend",
+    "migration:make": "npm run migration:make --prefix backend --"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
