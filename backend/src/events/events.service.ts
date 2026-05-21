@@ -9,37 +9,12 @@ import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
 import { getCacheKey } from '../database/redis-keys';
 import { CreateEventDto } from './dto/create-event.dto';
-
-export interface EventRecord {
-  id: string;
-  entity_id: string;
-  external_id: string;
-  type: string;
-  payload: Record<string, any>;
-  created_at: Date;
-}
-
-export interface LightweightEventRecord {
-  id: string;
-  entity_id: string;
-  external_id: string;
-}
-
-interface EntityRow {
-  id: string | number;
-  status: string;
-  critical_events_count: string | number;
-  updated_at?: Date;
-}
-
-interface DbEventRow {
-  id: string | number;
-  entity_id: string | number;
-  external_id: string;
-  type: string;
-  payload: string | Record<string, any>;
-  created_at: Date;
-}
+import {
+  EventRecord,
+  LightweightEventRecord,
+  EntityRow,
+  DbEventRow,
+} from './events.types';
 
 @Injectable()
 export class EventsService {

@@ -1,15 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateEntityDto } from './dto/create-entity.dto';
-
-export interface Entity {
-  id: string;
-  name: string;
-  status: string;
-  critical_events_count: number;
-  created_at: Date;
-  updated_at: Date;
-}
+import { Entity } from './entities.types';
 
 @Injectable()
 export class EntitiesService {
@@ -22,15 +14,15 @@ export class EntitiesService {
       `Creating monitored entity with name: ${createEntityDto.name}`,
     );
 
-    const [entity] = await this.dbService
+    const [entity] = (await this.dbService
       .db('entities')
       .insert({
         name: createEntityDto.name,
         status: 'active',
         critical_events_count: 0,
       })
-      .returning('*');
+      .returning('*')) as Entity[];
 
-    return entity as Entity;
+    return entity;
   }
 }
