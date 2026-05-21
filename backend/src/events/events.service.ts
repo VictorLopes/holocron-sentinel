@@ -127,8 +127,8 @@ export class EventsService implements OnModuleDestroy {
   ): Promise<(LightweightEventRecord & { is_duplicate: boolean }) | null> {
     const existingEvent = await this.getEventByExternalId(externalId);
     if (existingEvent) {
-      this.logger.log(
-        `Duplicate event ignored (idempotency) for external_id: ${externalId}`,
+      this.logger.warn(
+        `Duplicate event ignored for external_id: ${externalId}`,
       );
       return {
         ...existingEvent,
@@ -314,7 +314,8 @@ export class EventsService implements OnModuleDestroy {
     }
     const [{ count }] = await countQuery.count('id as count');
 
-    const rowsQuery = this.dbService.db('events')
+    const rowsQuery = this.dbService
+      .db('events')
       .select('*')
       .orderBy('created_at', 'desc')
       .limit(limit)
