@@ -18,9 +18,12 @@ export class EntitiesService {
   constructor(private readonly dbService: DatabaseService) {}
 
   async create(createEntityDto: CreateEntityDto): Promise<Entity> {
-    this.logger.log(`Creating monitored entity with name: ${createEntityDto.name}`);
+    this.logger.log(
+      `Creating monitored entity with name: ${createEntityDto.name}`,
+    );
 
-    const [entity] = await this.dbService.db('entities')
+    const [entity] = await this.dbService
+      .db('entities')
       .insert({
         name: createEntityDto.name,
         status: 'active',

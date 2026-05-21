@@ -7,7 +7,7 @@ export type CacheKeyName = keyof typeof CacheKeys;
 
 export function getCacheKey<T extends CacheKeyName>(
   name: T,
-  value: Parameters<typeof CacheKeys[T]>[0],
+  value: Parameters<(typeof CacheKeys)[T]>[0],
 ): string {
   return CacheKeys[name](value as any);
 }

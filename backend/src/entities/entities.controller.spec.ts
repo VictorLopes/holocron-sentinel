@@ -7,14 +7,16 @@ describe('EntitiesController', () => {
   let service: EntitiesService;
 
   const mockEntitiesService = {
-    create: jest.fn().mockImplementation((dto) => Promise.resolve({
-      id: '1',
-      name: dto.name,
-      status: 'active',
-      critical_events_count: 0,
-      created_at: new Date(),
-      updated_at: new Date(),
-    })),
+    create: jest.fn().mockImplementation((dto) =>
+      Promise.resolve({
+        id: '1',
+        name: dto.name,
+        status: 'active',
+        critical_events_count: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }),
+    ),
   };
 
   beforeEach(async () => {

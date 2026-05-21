@@ -8,14 +8,16 @@ describe('EventsController', () => {
   let service: EventsService;
 
   const mockEventsService = {
-    registerEvent: jest.fn().mockImplementation((dto: CreateEventDto) => Promise.resolve({
-      id: '1',
-      entity_id: dto.entity_id.toString(),
-      external_id: dto.external_id,
-      type: dto.type,
-      payload: dto.payload,
-      created_at: new Date(),
-    })),
+    registerEvent: jest.fn().mockImplementation((dto: CreateEventDto) =>
+      Promise.resolve({
+        id: '1',
+        entity_id: dto.entity_id.toString(),
+        external_id: dto.external_id,
+        type: dto.type,
+        payload: dto.payload,
+        created_at: new Date(),
+      }),
+    ),
   };
 
   beforeEach(async () => {

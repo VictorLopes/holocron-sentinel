@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import knex, { Knex } from 'knex';
 
 @Injectable()
@@ -8,7 +13,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.logger.log('Initializing Knex database connection...');
-    
+
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
       this.logger.error('DATABASE_URL environment variable is not defined!');

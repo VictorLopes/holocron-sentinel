@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventsService } from './events.service';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../database/redis.service';
-import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 describe('EventsService', () => {
   let service: EventsService;
@@ -44,7 +47,7 @@ describe('EventsService', () => {
       }),
       {
         transaction: mockTransaction,
-      }
+      },
     ),
   };
 
@@ -95,7 +98,11 @@ describe('EventsService', () => {
       expect(result).toBeDefined();
       expect(result.id).toBe('1');
       expect((result as any).is_duplicate).toBe(true);
-      expect(mockGetOrSet).toHaveBeenCalledWith('event:external_id:ext-123', 86400, expect.any(Function));
+      expect(mockGetOrSet).toHaveBeenCalledWith(
+        'event:external_id:ext-123',
+        86400,
+        expect.any(Function),
+      );
       expect(mockTransaction).not.toHaveBeenCalled();
     });
 
@@ -112,7 +119,7 @@ describe('EventsService', () => {
           external_id: 'ext-123',
           type: 'info',
           payload: { data: 'test' },
-        })
+        }),
       ).rejects.toThrow(UnprocessableEntityException);
 
       expect(mockTransaction).not.toHaveBeenCalled();
@@ -141,14 +148,16 @@ describe('EventsService', () => {
         if (table === 'events') {
           return {
             insert: jest.fn().mockReturnThis(),
-            returning: jest.fn().mockResolvedValue([{
-              id: '5',
-              entity_id: '10',
-              external_id: 'ext-123',
-              type: 'info',
-              payload: { data: 'test' },
-              created_at: new Date(),
-            }]),
+            returning: jest.fn().mockResolvedValue([
+              {
+                id: '5',
+                entity_id: '10',
+                external_id: 'ext-123',
+                type: 'info',
+                payload: { data: 'test' },
+                created_at: new Date(),
+              },
+            ]),
           };
         }
       });
@@ -165,8 +174,20 @@ describe('EventsService', () => {
       expect(result).toBeDefined();
       expect(result.id).toBe('5');
       expect(mockTransaction).toHaveBeenCalled();
-      expect(mockRedisSet).toHaveBeenNthCalledWith(1, 'event:external_id:ext-123', expect.any(String), 'EX', 86400);
-      expect(mockRedisSet).toHaveBeenNthCalledWith(2, 'entity:10', JSON.stringify({ status: 'active', critical_events_count: 1 }), 'EX', 86400);
+      expect(mockRedisSet).toHaveBeenNthCalledWith(
+        1,
+        'event:external_id:ext-123',
+        expect.any(String),
+        'EX',
+        86400,
+      );
+      expect(mockRedisSet).toHaveBeenNthCalledWith(
+        2,
+        'entity:10',
+        JSON.stringify({ status: 'active', critical_events_count: 1 }),
+        'EX',
+        86400,
+      );
     });
 
     it('should increment count and auto-suspend when critical limit is reached', async () => {
@@ -193,14 +214,16 @@ describe('EventsService', () => {
         if (table === 'events') {
           return {
             insert: jest.fn().mockReturnThis(),
-            returning: jest.fn().mockResolvedValue([{
-              id: '6',
-              entity_id: '10',
-              external_id: 'ext-critical',
-              type: 'critical',
-              payload: { data: 'threat' },
-              created_at: new Date(),
-            }]),
+            returning: jest.fn().mockResolvedValue([
+              {
+                id: '6',
+                entity_id: '10',
+                external_id: 'ext-critical',
+                type: 'critical',
+                payload: { data: 'threat' },
+                created_at: new Date(),
+              },
+            ]),
           };
         }
       });
@@ -221,7 +244,13 @@ describe('EventsService', () => {
         status: 'suspended',
         updated_at: 'now',
       });
-      expect(mockRedisSet).toHaveBeenNthCalledWith(2, 'entity:10', JSON.stringify({ status: 'suspended', critical_events_count: 3 }), 'EX', 86400);
+      expect(mockRedisSet).toHaveBeenNthCalledWith(
+        2,
+        'entity:10',
+        JSON.stringify({ status: 'suspended', critical_events_count: 3 }),
+        'EX',
+        86400,
+      );
     });
   });
 });

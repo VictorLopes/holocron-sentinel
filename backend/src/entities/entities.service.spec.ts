@@ -7,14 +7,16 @@ describe('EntitiesService', () => {
   let dbService: DatabaseService;
 
   const mockKnexInsert = jest.fn().mockReturnValue({
-    returning: jest.fn().mockResolvedValue([{
-      id: '1',
-      name: 'Death Star',
-      status: 'active',
-      critical_events_count: 0,
-      created_at: new Date(),
-      updated_at: new Date(),
-    }]),
+    returning: jest.fn().mockResolvedValue([
+      {
+        id: '1',
+        name: 'Death Star',
+        status: 'active',
+        critical_events_count: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]),
   });
 
   const mockKnex = jest.fn().mockReturnValue({
