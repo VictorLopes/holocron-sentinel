@@ -2,7 +2,7 @@
 
 import React, {useMemo} from 'react';
 import {Database, CheckCircle, XCircle, Flame} from 'lucide-react';
-import {useDashboard} from './DashboardContext';
+import {useDashboard} from '../DashboardContext';
 
 export default function StatsCards() {
     const {entities} = useDashboard();

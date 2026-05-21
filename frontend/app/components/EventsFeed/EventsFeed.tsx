@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Activity, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
-import { useDashboard } from './DashboardContext';
+import { useDashboard } from '../DashboardContext';
 
 export default function EventsFeed() {
     const { events, entities } = useDashboard();

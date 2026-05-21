@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
-import { useDashboard } from './DashboardContext';
+import { useDashboard } from '../DashboardContext';
 
 export default function StreamStatus() {
     const { streamStatus, isRefreshing, handleRefreshAll } = useDashboard();

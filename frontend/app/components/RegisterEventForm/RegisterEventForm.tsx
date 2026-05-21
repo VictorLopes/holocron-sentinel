@@ -7,7 +7,7 @@ import {
     AlertCircle,
     CheckCircle,
 } from 'lucide-react';
-import {useDashboard} from './DashboardContext';
+import {useDashboard} from '../DashboardContext';
 
 export default function RegisterEventForm() {
     const {entities, selectedEntityId, setSelectedEntityId} = useDashboard();

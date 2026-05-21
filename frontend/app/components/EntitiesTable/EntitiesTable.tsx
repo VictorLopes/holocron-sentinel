@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search, Plus, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
-import { useDashboard, Entity, CRITICAL_LIMIT } from './DashboardContext';
+import { useDashboard, Entity, CRITICAL_LIMIT } from '../DashboardContext';
 
 export default function EntitiesTable() {
     const { entities, setEntities, setSelectedEntityId } = useDashboard();

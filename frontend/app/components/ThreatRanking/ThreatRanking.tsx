@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
-import { useDashboard } from './DashboardContext';
+import { useDashboard } from '../DashboardContext';
 
 export default function ThreatRanking() {
     const { ranking } = useDashboard();
