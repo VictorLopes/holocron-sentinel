@@ -5,20 +5,20 @@ import { Database, CheckCircle, XCircle, Flame } from 'lucide-react';
 import { useDashboardContext } from '../DashboardContext';
 
 export default function StatsCards() {
-    const { entities } = useDashboardContext();
+    const { allEntities } = useDashboardContext();
 
     const stats = useMemo(() => {
-        const total = entities.length;
-        const active = entities.filter((e) => e.status === 'active').length;
-        const suspended = entities.filter(
+        const total = allEntities.length;
+        const active = allEntities.filter((e) => e.status === 'active').length;
+        const suspended = allEntities.filter(
             (e) => e.status === 'suspended',
         ).length;
-        const criticalCount = entities.reduce(
+        const criticalCount = allEntities.reduce(
             (acc, curr) => acc + (curr.critical_events_count || 0),
             0,
         );
         return { total, active, suspended, criticalCount };
-    }, [entities]);
+    }, [allEntities]);
 
     return (
         <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

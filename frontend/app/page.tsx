@@ -9,7 +9,7 @@ import {
     RegisterEventForm,
     EventsFeed,
 } from './components';
-import { API_BASE_URL } from './components/DashboardContext';
+import { API_BASE_URL } from './config';
 
 export const dynamic = 'force-dynamic';
 

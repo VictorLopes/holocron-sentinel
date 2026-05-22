@@ -2,17 +2,28 @@
 
 import React, { useState } from 'react';
 import { Search, Plus, AlertCircle } from 'lucide-react';
-import { useDashboardContext, Entity, CRITICAL_LIMIT, API_BASE_URL } from '../DashboardContext';
+import {
+    useDashboardContext,
+    Entity,
+    CRITICAL_LIMIT,
+    API_BASE_URL,
+} from '../DashboardContext';
 
 export default function EntitiesTable() {
     const {
         entities,
         setEntities,
+        setAllEntities,
         setSelectedEntityId,
         entitySearch,
         setEntitySearch,
         entityStatusFilter,
         setEntityStatusFilter,
+        entitiesPage,
+        setEntitiesPage,
+        totalPages,
+        totalEntities,
+        entitiesLimit,
     } = useDashboardContext();
 
     const [showCreateEntity, setShowCreateEntity] = useState(false);
@@ -54,6 +65,7 @@ export default function EntitiesTable() {
             };
 
             setEntities((prev) => [fullEntity, ...prev]);
+            setAllEntities((prev) => [fullEntity, ...prev]);
             setNewEntityName('');
             setCreateEntitySuccess('Entity created successfully!');
             setTimeout(() => {
@@ -186,9 +198,7 @@ export default function EntitiesTable() {
                             <tr className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase border-b border-slate-200 dark:border-slate-800">
                                 <th className="px-6 py-4">Entity Details</th>
                                 <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">
-                                    Threat Level (Critical Events)
-                                </th>
+                                <th className="px-6 py-4">Critical Events</th>
                                 <th className="px-6 py-4">Total Events</th>
                                 <th className="px-6 py-4">Last Activity</th>
                             </tr>
@@ -314,6 +324,66 @@ export default function EntitiesTable() {
                     </table>
                 )}
             </div>
+            {/* Pagination footer */}
+            {totalEntities > 0 && (
+                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                        Showing{' '}
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            {(entitiesPage - 1) * entitiesLimit + 1}
+                        </span>{' '}
+                        to{' '}
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            {Math.min(
+                                entitiesPage * entitiesLimit,
+                                totalEntities,
+                            )}
+                        </span>{' '}
+                        of{' '}
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            {totalEntities}
+                        </span>{' '}
+                        entities
+                    </div>
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                            <button
+                                onClick={() =>
+                                    setEntitiesPage((p) => Math.max(p - 1, 1))
+                                }
+                                disabled={entitiesPage === 1}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-50 disabled:hover:bg-transparent transition-colors">
+                                Previous
+                            </button>
+                            {[...Array(totalPages)].map((_, idx) => {
+                                const pNum = idx + 1;
+                                return (
+                                    <button
+                                        key={pNum}
+                                        onClick={() => setEntitiesPage(pNum)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                            entitiesPage === pNum
+                                                ? 'bg-indigo-600 text-white shadow-sm'
+                                                : 'border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850'
+                                        }`}>
+                                        {pNum}
+                                    </button>
+                                );
+                            })}
+                            <button
+                                onClick={() =>
+                                    setEntitiesPage((p) =>
+                                        Math.min(p + 1, totalPages),
+                                    )
+                                }
+                                disabled={entitiesPage === totalPages}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-50 disabled:hover:bg-transparent transition-colors">
+                                Next
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

@@ -5,7 +5,7 @@ import { Activity } from 'lucide-react';
 import { useDashboardContext } from '../DashboardContext';
 
 export default function EventsFeed() {
-    const { events, entities } = useDashboardContext();
+    const { events, allEntities } = useDashboardContext();
     const [eventTypeFilter, setEventTypeFilter] = useState<
         'all' | 'info' | 'warning' | 'critical'
     >('all');
@@ -63,7 +63,7 @@ export default function EventsFeed() {
                     </div>
                 ) : (
                     filteredEvents.map((ev) => {
-                        const targetEntity = entities.find(
+                        const targetEntity = allEntities.find(
                             (ent) => String(ent.id) === String(ev.entity_id),
                         );
                         const entityName = targetEntity

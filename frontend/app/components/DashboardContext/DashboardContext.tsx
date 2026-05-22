@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
+import { CRITICAL_LIMIT, API_BASE_URL } from '../../config';
 
 export interface Entity {
     id: string;
@@ -23,15 +24,11 @@ export interface EventRecord {
     created_at: string;
 }
 
-export const CRITICAL_LIMIT =
-    Number(process.env.NEXT_PUBLIC_CRITICAL_LIMIT) || 3;
-
-export const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
 interface DashboardContextType {
     entities: Entity[];
     setEntities: React.Dispatch<React.SetStateAction<Entity[]>>;
+    allEntities: Entity[];
+    setAllEntities: React.Dispatch<React.SetStateAction<Entity[]>>;
     events: EventRecord[];
     setEvents: React.Dispatch<React.SetStateAction<EventRecord[]>>;
     ranking: Entity[];
@@ -45,6 +42,11 @@ interface DashboardContextType {
     setEntitySearch: (search: string) => void;
     entityStatusFilter: 'all' | 'active' | 'suspended';
     setEntityStatusFilter: (status: 'all' | 'active' | 'suspended') => void;
+    entitiesPage: number;
+    setEntitiesPage: React.Dispatch<React.SetStateAction<number>>;
+    totalPages: number;
+    totalEntities: number;
+    entitiesLimit: number;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(
