@@ -27,7 +27,7 @@ graph TD
     subgraph Infra ["Infrastructure Services"]
         PG[("PostgreSQL 16 (Knex)")]
         RedisCache[("Redis 7 (Deduplication & Cache)")]
-        LocalStack["LocalStack (AWS CloudWatch Logs)"]
+        LocalStack["LocalStack - AWS CloudWatch Logs"]
     end
 
     UI -->|POST /events| Controller
@@ -42,7 +42,7 @@ graph TD
 
     %% Streaming Flow
     EventSvc -->|4. RxJS Subject| SSE_Client
-    SSE_Client -.->|Server-Sent Events (SSE)| UI
+    SSE_Client -.->|Server-Sent Events via SSE| UI
 
     %% Logging Flow
     CWLogger -->|PutLogEvents| LocalStack
