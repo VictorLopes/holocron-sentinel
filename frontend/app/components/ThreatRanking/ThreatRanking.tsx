@@ -1,10 +1,10 @@
 'use client';
 
 import { TrendingUp } from 'lucide-react';
-import { useDashboard } from '../DashboardContext';
+import { useDashboardContext } from '../DashboardContext';
 
 export default function ThreatRanking() {
-    const { ranking } = useDashboard();
+    const { ranking } = useDashboardContext();
 
     return (
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">

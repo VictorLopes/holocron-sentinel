@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Search, Plus, AlertCircle } from 'lucide-react';
-import { useDashboard, Entity, CRITICAL_LIMIT } from '../DashboardContext';
+import { useDashboardContext, Entity, CRITICAL_LIMIT, API_BASE_URL } from '../DashboardContext';
 
 export default function EntitiesTable() {
     const {
@@ -13,7 +13,7 @@ export default function EntitiesTable() {
         setEntitySearch,
         entityStatusFilter,
         setEntityStatusFilter,
-    } = useDashboard();
+    } = useDashboardContext();
 
     const [showCreateEntity, setShowCreateEntity] = useState(false);
     const [newEntityName, setNewEntityName] = useState('');
@@ -33,7 +33,7 @@ export default function EntitiesTable() {
         }
 
         try {
-            const res = await fetch('http://localhost:3002/entities', {
+            const res = await fetch(`${API_BASE_URL}/entities`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newEntityName }),

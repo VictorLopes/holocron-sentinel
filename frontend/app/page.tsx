@@ -1,5 +1,5 @@
-import type {Metadata} from 'next';
-import {Activity} from 'lucide-react';
+import type { Metadata } from 'next';
+import { Activity } from 'lucide-react';
 import {
     DashboardProvider,
     StreamStatus,
@@ -9,6 +9,7 @@ import {
     RegisterEventForm,
     EventsFeed,
 } from './components';
+import { API_BASE_URL } from './components/DashboardContext';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 async function fetchData(url: string) {
     try {
-        const res = await fetch(url, {cache: 'no-store'});
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) {
             throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
         }
@@ -34,9 +35,9 @@ async function fetchData(url: string) {
 
 export default async function Home() {
     const [initialEntities, initialEvents, initialRanking] = await Promise.all([
-        fetchData('http://localhost:3002/entities?limit=100'),
-        fetchData('http://localhost:3002/events?limit=50'),
-        fetchData('http://localhost:3002/entities/ranking'),
+        fetchData(`${API_BASE_URL}/entities?limit=10`),
+        fetchData(`${API_BASE_URL}/events?limit=50`),
+        fetchData(`${API_BASE_URL}/entities/ranking`),
     ]);
 
     return (

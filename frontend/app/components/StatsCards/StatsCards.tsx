@@ -2,10 +2,10 @@
 
 import React, { useMemo } from 'react';
 import { Database, CheckCircle, XCircle, Flame } from 'lucide-react';
-import { useDashboard } from '../DashboardContext';
+import { useDashboardContext } from '../DashboardContext';
 
 export default function StatsCards() {
-    const { entities } = useDashboard();
+    const { entities } = useDashboardContext();
 
     const stats = useMemo(() => {
         const total = entities.length;

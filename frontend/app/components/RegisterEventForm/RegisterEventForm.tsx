@@ -7,10 +7,10 @@ import {
     AlertCircle,
     CheckCircle,
 } from 'lucide-react';
-import { useDashboard } from '../DashboardContext';
+import { useDashboardContext, API_BASE_URL } from '../DashboardContext';
 
 export default function RegisterEventForm() {
-    const { entities, selectedEntityId, setSelectedEntityId } = useDashboard();
+    const { entities, selectedEntityId, setSelectedEntityId } = useDashboardContext();
 
     const [eventExternalId, setEventExternalId] = useState('');
     const [eventType, setEventType] = useState<'info' | 'warning' | 'critical'>(
@@ -52,7 +52,7 @@ export default function RegisterEventForm() {
         }
 
         try {
-            const res = await fetch('http://localhost:3002/events', {
+            const res = await fetch(`${API_BASE_URL}/events`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Entity, EventRecord, CRITICAL_LIMIT } from './DashboardContext';
+import { Entity, EventRecord, CRITICAL_LIMIT, API_BASE_URL } from '../components/DashboardContext/DashboardContext';
 
-export function useDashboardState(
+export function useDashboard(
     initialEntities: Entity[],
     initialEvents: EventRecord[],
     initialRanking: Entity[],
@@ -44,7 +44,7 @@ export function useDashboardState(
         const fetchFilteredEntities = async () => {
             setIsRefreshing(true);
             try {
-                let url = 'http://localhost:3002/entities?limit=100';
+                let url = `${API_BASE_URL}/entities?limit=100`;
                 if (debouncedSearch) {
                     url += `&search=${encodeURIComponent(debouncedSearch)}`;
                 }
@@ -68,7 +68,7 @@ export function useDashboardState(
 
     const fetchRanking = async () => {
         try {
-            const res = await fetch('http://localhost:3002/entities/ranking');
+            const res = await fetch(`${API_BASE_URL}/entities/ranking`);
             if (res.ok) {
                 const rankingData = await res.json();
                 setRanking(rankingData.data || []);
@@ -81,7 +81,7 @@ export function useDashboardState(
     const handleRefreshAll = async () => {
         setIsRefreshing(true);
         try {
-            let entitiesUrl = 'http://localhost:3002/entities?limit=100';
+            let entitiesUrl = `${API_BASE_URL}/entities?limit=100`;
             if (entitySearch) {
                 entitiesUrl += `&search=${encodeURIComponent(entitySearch)}`;
             }
@@ -91,8 +91,8 @@ export function useDashboardState(
 
             const [entitiesRes, eventsRes, rankingRes] = await Promise.all([
                 fetch(entitiesUrl),
-                fetch('http://localhost:3002/events?limit=50'),
-                fetch('http://localhost:3002/entities/ranking'),
+                fetch(`${API_BASE_URL}/events?limit=50`),
+                fetch(`${API_BASE_URL}/entities/ranking`),
             ]);
 
             if (entitiesRes.ok) {
@@ -120,7 +120,7 @@ export function useDashboardState(
         const connectStream = () => {
             setStreamStatus('connecting');
             eventSource = new EventSource(
-                'http://localhost:3002/events/stream',
+                `${API_BASE_URL}/events/stream`,
             );
 
             eventSource.onopen = () => {

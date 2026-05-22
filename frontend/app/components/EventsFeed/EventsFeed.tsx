@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { Activity } from 'lucide-react';
-import { useDashboard } from '../DashboardContext';
+import { useDashboardContext } from '../DashboardContext';
 
 export default function EventsFeed() {
-    const { events, entities } = useDashboard();
+    const { events, entities } = useDashboardContext();
     const [eventTypeFilter, setEventTypeFilter] = useState<
         'all' | 'info' | 'warning' | 'critical'
     >('all');

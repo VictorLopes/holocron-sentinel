@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
-import { useDashboard } from '../DashboardContext';
+import { useDashboardContext } from '../DashboardContext';
 
 export default function StreamStatus() {
-    const { streamStatus, isRefreshing, handleRefreshAll } = useDashboard();
+    const { streamStatus, isRefreshing, handleRefreshAll } = useDashboardContext();
 
     return (
         <div className="flex items-center gap-3">

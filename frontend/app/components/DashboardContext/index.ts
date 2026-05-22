@@ -1,7 +1,8 @@
 export {
     DashboardProvider,
-    useDashboard,
+    useDashboardContext,
     CRITICAL_LIMIT,
+    API_BASE_URL,
 } from './DashboardContext';
 
 export type {

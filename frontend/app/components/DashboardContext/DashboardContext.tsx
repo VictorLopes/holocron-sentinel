@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
-import { useDashboardState } from './useDashboardState';
+import { useDashboard } from '../../hooks/useDashboard';
 
 export interface Entity {
     id: string;
@@ -26,6 +26,9 @@ export interface EventRecord {
 export const CRITICAL_LIMIT =
     Number(process.env.NEXT_PUBLIC_CRITICAL_LIMIT) || 3;
 
+export const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 interface DashboardContextType {
     entities: Entity[];
     setEntities: React.Dispatch<React.SetStateAction<Entity[]>>;
@@ -48,10 +51,12 @@ const DashboardContext = createContext<DashboardContextType | undefined>(
     undefined,
 );
 
-export function useDashboard() {
+export function useDashboardContext() {
     const context = useContext(DashboardContext);
     if (!context) {
-        throw new Error('useDashboard must be used within a DashboardProvider');
+        throw new Error(
+            'useDashboardContext must be used within a DashboardProvider',
+        );
     }
     return context;
 }
@@ -69,11 +74,7 @@ export function DashboardProvider({
     initialRanking,
     children,
 }: DashboardProviderProps) {
-    const value = useDashboardState(
-        initialEntities,
-        initialEvents,
-        initialRanking,
-    );
+    const value = useDashboard(initialEntities, initialEvents, initialRanking);
 
     return (
         <DashboardContext.Provider value={value}>
