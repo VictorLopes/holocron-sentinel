@@ -1,14 +1,64 @@
 # Holocron Sentinel — Sistema de Monitoramento da Aliança Rebelde
 
-O **Holocron Sentinel** é um sistema estratégico que registra eventos e emite alertas em tempo real sobre atividades críticas e possíveis ameaças, suspendendo automaticamente entidades que atinjam o limite crítico de segurança.
+O **Holocron Sentinel** é um sistema estratégico que registra eventos e emite alertas em tempo real sobre atividades críticas e possíveis ameaças, suspendendo automaticamente entidades que atinjam o limite crítico de segurança. O projeto foi desenvolvido com base nos requisitos detalhados no [Desafio Técnico](problem.md).
 
-![Design Alto Nível do Holocron Sentinel](.github/image01.png)
+---
+
+## 🚀 Como Executar o Projeto Localmente
+
+### Pré-requisitos
+
+- [Docker](https://www.docker.com/) e Docker Compose instalados.
+- [Node.js](https://nodejs.org/) (versão 18 ou superior).
+
+### 1. Clonar e Configurar Variáveis de Ambiente
+
+Crie os arquivos `.env` copiando os respectivos templates para o backend e o frontend:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+```bash
+cp frontend/.env.example frontend/.env
+```
+
+### 2. Inicializar a Infraestrutura (Docker)
+
+Suba os containers do PostgreSQL, Redis e LocalStack em segundo plano:
+
+```bash
+docker compose up -d
+```
+
+### 3. Instalar Dependências e Rodar Migrações
+
+Instale todas as dependências do monorepo e execute as migrações do banco de dados do backend:
+
+```bash
+npm run install:all
+```
+
+```bash
+npm run migration:run
+```
+
+### 4. Iniciar Servidores de Desenvolvimento
+
+Inicie tanto o backend (porta `3001`) quanto o frontend (porta `3000`) simultaneamente em modo de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+- **Frontend**: Acesse [http://localhost:3000](http://localhost:3000)
+- **Backend (SSE Stream)**: Acesse [http://localhost:3002/events/stream](http://localhost:3002/events/stream)
 
 ---
 
 ## 🏗️ Arquitetura do Sistema
 
-O sistema é construído sobre uma arquitetura moderna dividida em três camadas principais: o cliente web (Next.js), a API de alta performance (NestJS com Fastify) e os serviços de infraestrutura (PostgreSQL, Redis e LocalStack).
+O sistema é construído sobre uma arquitetura que dividida em três camadas principais: o cliente web (Next.js), a API (NestJS com Fastify) e os serviços de infraestrutura (PostgreSQL, Redis e LocalStack).
 
 ```mermaid
 graph TD
@@ -47,6 +97,8 @@ graph TD
     %% Logging Flow
     CWLogger -->|PutLogEvents| LocalStack
 ```
+
+![Design Alto Nível do Holocron Sentinel](.github/image01.png)
 
 ### Stack Tecnológica
 
@@ -95,7 +147,7 @@ Para atualizar o dashboard dos operadores sem a necessidade de polling ineficien
 Em um cenário com milhões de eventos e milhares de entidades, os endpoints de leitura precisam ser altamente eficientes:
 
 1.  **Agregações Inteligentes no Postgres**: A listagem de entidades agrega o total de eventos e a data do último evento executando `COUNT` e `MAX` nativamente no banco agrupado por `e.id`, eliminando a necessidade de mapeamentos custosos de memória no NodeJS.
-2.  **Índices Estratégicos**: A tabela de eventos possui índices aplicados na chave estrangeira `entity_id` e uma chave única em `external_id` (que gera um índice B-Tree automático), acelerando as junções e as validações de idempotência.
+2.  **Índices Estratégicos**: A tabela de eventos possui índices aplicados na chave estrangeira `entity_id` e uma chave única em `external_id` (que gera um índice automático), acelerando as junções e as validações de idempotência.
 3.  **Caching**: Entidades validadas com frequência durante o recebimento de eventos são cacheadas no Redis. A cada evento processado com sucesso, o cache correspondente da entidade é invalidado para garantir a consistência das próximas requisições.
 
 ---
@@ -107,67 +159,39 @@ Em um ambiente de produção real, sob volumes de dados massivos, aplicaríamos 
 1.  **Processamento Assíncrono via Filas (Message Queue)**:
     Decoplaríamos a rota de ingestão de eventos (`POST /events`) do processamento de negócio. A API apenas persistiria o evento bruto em uma fila (SQS, BullMQ, RabbitMQ, Kafka) e responderia imediatamente `202 Accepted`. Consumidores em background processariam as filas de forma escalável e resiliente.
 2.  **Locks Distribuídos no Redis (Redlock)**:
-    Substituiríamos o bloqueio pessimista do PostgreSQL (`FOR UPDATE`) por fechaduras distribuídas via Redis (utilizando algoritmos como Redlock). Isso evitaria a retenção de conexões abertas no pool do banco de dados relacional em momentos de alta carga.
+    Substituiríamos o bloqueio pessimista do PostgreSQL (`FOR UPDATE`) por **Distributed Locks** via Redis (utilizando algoritmos como Redlock). Isso evitaria a retenção de conexões abertas no pool do banco de dados relacional em momentos de alta carga.
 3.  **Particionamento de Tabelas**:
     A tabela `events` cresceria exponencialmente. Em produção, aplicaríamos o **Table Partitioning** (particionamento por tempo, ex: semanal ou mensal) no PostgreSQL, mantendo os índices de cada partição pequenos e permitindo o arquivamento/descarte simples de dados antigos.
 4.  **Pub/Sub do Redis para SSE Horizontal**:
     Se escalarmos horizontalmente o backend em múltiplas instâncias (containers), um cliente conectado na Instância A não receberia eventos disparados na Instância B. Integraríamos a transmissão do SSE com o **Redis Pub/Sub**, permitindo que todas as réplicas ouvissem os novos eventos e os distribuíssem aos seus clientes locais.
 
----
+```mermaid
+    sequenceDiagram
 
-## 🚀 Como Executar o Projeto Localmente
+    participant Cliente1 as Operador 1 (na Instância A)
+    participant API_A as Instância A de API
+    participant Redis as Redis Pub/Sub (Canal)
+    participant API_B as Instância B de API
+    participant Cliente2 as Operador 2 (na Instância B)
 
-### Pré-requisitos
-
-- [Docker](https://www.docker.com/) e Docker Compose instalados.
-- [Node.js](https://nodejs.org/) (versão 18 ou superior).
-
-### 1. Clonar e Configurar Variáveis de Ambiente
-
-Crie os arquivos `.env` copiando os respectivos templates para o backend e o frontend:
-
-```bash
-# Na raiz do projeto:
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+    Note over API_A, API_B: Ambas se inscrevem no canal "sentinel:events" do Redis
+    API_B->>Redis: PUBLISH "sentinel:events" (Novo Evento!)
+    Redis-->>API_A: Entrega cópia do evento
+    Redis-->>API_B: Entrega cópia do evento
+    API_A->>Cliente1: SSE Envia Evento
+    API_B->>Cliente2: SSE Envia Evento
 ```
 
-### 2. Inicializar a Infraestrutura (Docker)
-
-Suba os containers do PostgreSQL, Redis e LocalStack em segundo plano:
-
-```bash
-docker compose up -d
-```
-
-### 3. Instalar Dependências e Rodar Migrações
-
-Instale todas as dependências do monorepo e execute as migrações do banco de dados do backend:
-
-```bash
-npm run install:all
-```
-
-```bash
-npm run migration:run
-```
-
-### 4. Iniciar Servidores de Desenvolvimento
-
-Inicie tanto o backend (porta `3001`) quanto o frontend (porta `3000`) simultaneamente em modo de desenvolvimento:
-
-```bash
-npm run dev
-```
-
-- **Frontend**: Acesse [http://localhost:3000](http://localhost:3000)
-- **Backend (SSE Stream)**: Acesse [http://localhost:3002/events/stream](http://localhost:3002/events/stream)
+- Quando as instâncias da API iniciam, todas elas se conectam ao Redis e se "inscrevem" (Subscribe) em um canal compartilhado, por exemplo, sentinel:events.
+- Quando a Instância B recebe um novo evento, em vez de guardar apenas na sua memória local, ela publica (Publish) esse evento no canal do Redis.
+- O Redis, instantaneamente, distribui esse evento para todas as instâncias da API inscritas (tanto a A quanto a B).
+- Ao receber o evento vindo do Redis, a Instância A repassa para o Operador 1, e a Instância B repassa para o Operador 2.
 
 ---
 
 ## 🧪 Suíte de Testes e Simulações
 
-### Executando Testes Unitários e de Integração
+### Executando Testes Unitários
 
 Para validar as regras de negócio de criação de entidades, registro de eventos, validação de limites e idempotência:
 
