@@ -45,7 +45,6 @@ graph TD
     SSE_Client -.->|Server-Sent Events (SSE)| UI
 
     %% Logging Flow
-    App -->|Batch / Buffer Logs| CWLogger
     CWLogger -->|PutLogEvents| LocalStack
 ```
 
