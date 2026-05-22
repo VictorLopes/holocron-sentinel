@@ -52,7 +52,7 @@ npm run dev
 ```
 
 - **Frontend**: Acesse [http://localhost:3000](http://localhost:3000)
-- **Backend (SSE Stream)**: Acesse [http://localhost:3002/events/stream](http://localhost:3002/events/stream)
+- **Backend**: Acesse [http://localhost:3002](http://localhost:3002)
 
 ---
 
@@ -100,7 +100,7 @@ graph TD
 
 ![Design Alto Nível do Holocron Sentinel](.github/image01.png)
 
-### Stack Tecnológica
+### Stack
 
 - **Frontend**: Next.js 15+, TypeScript, TailwindCSS/Vanilla CSS, EventSource para Server-Sent Events (SSE).
 - **Backend**: NestJS (com adaptador **Fastify** para maior vazão e menor latência), TypeScript, Knex.js (Query Builder estruturado).
