@@ -2,6 +2,8 @@
 
 O **Holocron Sentinel** é um sistema estratégico que registra eventos e emite alertas em tempo real sobre atividades críticas e possíveis ameaças, suspendendo automaticamente entidades que atinjam o limite crítico de segurança.
 
+![Design Alto Nível do Holocron Sentinel](.github/image01.png)
+
 ---
 
 ## 🏗️ Arquitetura do Sistema
