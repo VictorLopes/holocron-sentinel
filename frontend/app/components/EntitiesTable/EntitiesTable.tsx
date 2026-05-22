@@ -2,12 +2,8 @@
 
 import React, { useState } from 'react';
 import { Search, Plus, AlertCircle } from 'lucide-react';
-import {
-    useDashboardContext,
-    Entity,
-    CRITICAL_LIMIT,
-    API_BASE_URL,
-} from '../DashboardContext';
+import { useDashboardContext, Entity } from '../DashboardContext';
+import { CRITICAL_LIMIT, API_BASE_URL } from '../../config';
 
 export default function EntitiesTable() {
     const {

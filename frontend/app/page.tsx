@@ -57,7 +57,7 @@ export default async function Home() {
                                     Holocron Sentinel
                                 </h1>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Real-Time Systems Monitoring
+                                    Real-Time Entities Monitoring
                                 </p>
                             </div>
                         </div>
